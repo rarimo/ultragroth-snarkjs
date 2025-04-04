@@ -34,6 +34,12 @@ import BigArray from "./bigarray.js";
 
 
 export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes, logger) {
+    if (indexes.length != 2) {
+        throw new Error("Not 2 indexes sets");
+    }
+
+    const C1IndexesSet = new Set(indexes[0]);
+    const C2IndexesSet = new Set(indexes[1]);
 
     const TAU_G1 = 0;
     const TAU_G2 = 1;
@@ -139,7 +145,8 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     const A = new BigArray(r1cs.nVars);
     const B1 = new BigArray(r1cs.nVars);
     const B2 = new BigArray(r1cs.nVars);
-    const C = new BigArray(r1cs.nVars- nPublic -1);
+    const C1 = new BigArray(indexes[0].length);
+    const C2 = new BigArray(indexes[1].length);
     const IC = new Array(nPublic+1);
 
     if (logger) logger.info("Reading tauG1");
@@ -159,14 +166,15 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
 
     await hashHPoints();
 
-    await composeAndWritePoints(8, "G1", C, "C");
+    await composeAndWritePoints(8, "G1", C1, "C1");
+    await composeAndWritePoints(9, "G1", C2, "C2");
     await composeAndWritePoints(5, "G1", A, "A");
     await composeAndWritePoints(6, "G1", B1, "B1");
     await composeAndWritePoints(7, "G2", B2, "B2");
 
     const csHash = csHasher.digest();
     // Contributions section
-    await startWriteSection(fdZKey, 10);
+    await startWriteSection(fdZKey, 11);
     await fdZKey.write(csHash);
     await fdZKey.writeULE32(0);
     await endWriteSection(fdZKey);
@@ -181,7 +189,7 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     return csHash;
 
     async function writeHs() {
-        await startWriteSection(fdZKey, 9);
+        await startWriteSection(fdZKey, 10);
         const buffOut = new BigBuffer(domainSize*sG1);
         if (cirPower < curve.Fr.s) {
             let sTauG1 = await readSection(fdPTau, sectionsPTau, 12, (domainSize*2-1)*sG1, domainSize*2*sG1);
@@ -235,10 +243,16 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l2t, l2, coefp]);
+                } else if (C1IndexesSet.has(s)) {
+                    if (typeof C1[s- nPublic -1] === "undefined") C1[s- nPublic -1] = [];
+                    C1[s - nPublic -1].push([l2t, l2, coefp]);
+                } else if (C2IndexesSet.has(s)) {
+                    if (typeof C2[s- nPublic -1] === "undefined") C2[s- nPublic -1] = [];
+                    C2[s - nPublic -1].push([l2t, l2, coefp]);
                 } else {
-                    if (typeof C[s- nPublic -1] === "undefined") C[s- nPublic -1] = [];
-                    C[s - nPublic -1].push([l2t, l2, coefp]);
+                    throw new Error("Index is not in set");
                 }
+
                 coefs.push([0, c, s, coefp]);
             }
 
@@ -262,9 +276,14 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l3t, l3, coefp]);
+                } else if (C1IndexesSet.has(s)) {
+                    if (typeof C1[s- nPublic -1] === "undefined") C1[s- nPublic -1] = [];
+                    C1[s- nPublic -1].push([l3t, l3, coefp]);
+                } else if (C2IndexesSet.has(s)) {
+                    if (typeof C2[s- nPublic -1] === "undefined") C2[s- nPublic -1] = [];
+                    C2[s- nPublic -1].push([l3t, l3, coefp]);
                 } else {
-                    if (typeof C[s- nPublic -1] === "undefined") C[s- nPublic -1] = [];
-                    C[s- nPublic -1].push([l3t, l3, coefp]);
+                    throw new Error("Index is not in set");
                 }
 
                 coefs.push([1, c, s, coefp]);
@@ -281,9 +300,14 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l1t, l1, coefp]);
+                } else if (C1IndexesSet.has(c)) {
+                    if (typeof C1[s- nPublic -1] === "undefined") C1[s- nPublic -1] = [];
+                    C1[s- nPublic -1].push([l1t, l1, coefp]);
+                } else if (C2IndexesSet.has(c)) {
+                    if (typeof C2[s- nPublic -1] === "undefined") C2[s- nPublic -1] = [];
+                    C2[s- nPublic -1].push([l1t, l1, coefp]);
                 } else {
-                    if (typeof C[s- nPublic -1] === "undefined") C[s- nPublic -1] = [];
-                    C[s- nPublic -1].push([l1t, l1, coefp]);
+                    throw new Error("Index is not in set");
                 }
             }
         }
