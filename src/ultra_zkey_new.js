@@ -87,6 +87,22 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     // Write the Groth header section
     ///////////
 
+    // HeaderGroth(2)
+    //      n8q
+    //      q
+    //      n8r
+    //      r
+    //      NVars
+    //      NPub
+    //      DomainSize  (multiple of 2
+    //      [alpha]1
+    //      [beta]1
+    //      [delta1]1
+    //      [beta]2
+    //      [gamma]2
+    //      [delta1]2
+    //      [delta2]1
+    //      [delta2]2
     await startWriteSection(fdZKey, 2);
     const primeQ = curve.q;
     const n8q = (Math.floor( (Scalar.bitLength(primeQ) - 1) / 64) +1)*8;
@@ -131,12 +147,16 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     const bg2U = new Uint8Array(sG2);
     curve.G2.toRprUncompressed(bg2U, 0, curve.G2.g);
 
-    await fdZKey.write(bg2);        // gamma2
-    await fdZKey.write(bg1);        // delta1
-    await fdZKey.write(bg2);        // delta2
-    csHasher.update(bg2U);      // gamma2
-    csHasher.update(bg1U);      // delta1
-    csHasher.update(bg2U);      // delta2
+    await fdZKey.write(bg2);        // [gamma]2
+    await fdZKey.write(bg1);        // [delta1]1
+    await fdZKey.write(bg2);        // [delta1]2
+    await fdZKey.write(bg1);        // [delta2]1
+    await fdZKey.write(bg2);        // [delta2]2
+    csHasher.update(bg2U);      // [gamma]2
+    csHasher.update(bg1U);      // [delta1]1
+    csHasher.update(bg2U);      // [delta1]2
+    csHasher.update(bg1U);      // [delta2]1
+    csHasher.update(bg2U);      // [delta2]2
     await endWriteSection(fdZKey);
 
     if (logger) logger.info("Reading r1cs");

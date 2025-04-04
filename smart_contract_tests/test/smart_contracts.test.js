@@ -88,7 +88,15 @@ describe("Smart contracts test suite", function () {
 
         const zkeyFilename = { type: "mem" };
 
-        await snarkjs.ultraZKey.newUltraZKey(r1csFilename, ptauFilename, zkeyFilename, [[], []]);
+        const c1Indexes = [];
+        const c2Indexes = [];
+
+        for (let i = 0; i < 10000; ++i) {
+            c1Indexes.push(i);
+            c2Indexes.push(i);
+        }
+
+        await snarkjs.ultraZKey.newUltraZKey(r1csFilename, ptauFilename, zkeyFilename, [c1Indexes, c2Indexes]);
 
         return true;
         // const { proof: proof, publicSignals: publicInputs } = await snarkjs.groth16.prove(zkeyFilename, wtnsFilename);
