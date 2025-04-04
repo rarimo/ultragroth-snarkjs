@@ -97,9 +97,9 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     //      DomainSize  (multiple of 2
     //      [alpha]1
     //      [beta]1
-    //      [delta1]1
     //      [beta]2
     //      [gamma]2
+    //      [delta1]1
     //      [delta1]2
     //      [delta2]1
     //      [delta2]2
