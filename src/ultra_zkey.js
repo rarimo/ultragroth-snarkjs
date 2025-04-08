@@ -19,3 +19,4 @@
 
 
 export {default as newUltraZKey} from "./ultra_zkey_new.js";
+export {default as ultraZkeyExportJson} from "./ultra_zkey_export_json.js";

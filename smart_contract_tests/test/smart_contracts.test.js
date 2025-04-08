@@ -86,17 +86,19 @@ describe("Smart contracts test suite", function () {
     async function groth16Verify(r1csFilename, wtnsFilename) {
         // const solidityVerifierFilename = path.join("contracts", "groth16.sol");
 
-        const zkeyFilename = { type: "mem" };
+        const rawIndexes = fs.readFileSync("data.json");
+        const indexes = JSON.parse(rawIndexes);
 
-        const c1Indexes = [];
-        const c2Indexes = [];
+        indexes.c1 = indexes.c1.map(Number);
+        indexes.c2 = indexes.c2.map(Number);
 
-        for (let i = 0; i < 10000; ++i) {
-            c1Indexes.push(i);
-            c2Indexes.push(i);
-        }
+        const ptauFile = "powersOfTau28_hez_final_20.ptau";
+        const r1csFile = "seheavy_lookup.r1cs";
+        const zkeyFile = "seheavy_lookup.zkey";
 
-        await snarkjs.ultraZKey.newUltraZKey(r1csFilename, ptauFilename, zkeyFilename, [c1Indexes, c2Indexes]);
+        await snarkjs.ultraZKey.newUltraZKey(r1csFile, ptauFile, zkeyFile, [indexes.c1, indexes.c2]);
+
+        console.log(await snarkjs.ultraZKey.ultraZkeyExportJson(zkeyFile));
 
         return true;
         // const { proof: proof, publicSignals: publicInputs } = await snarkjs.groth16.prove(zkeyFilename, wtnsFilename);
