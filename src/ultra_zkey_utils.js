@@ -99,7 +99,7 @@ export async function writeHeader(fd, zkey) {
 }
 
 export async function writeZKey(fileName, zkey) {
-    const fd = await binFileUtils.createBinFile(fileName, "zkey", 1, 10);
+    const fd = await binFileUtils.createBinFile(fileName, "zkey", 1, 12);
 
     await writeHeader(fd, zkey);
 
