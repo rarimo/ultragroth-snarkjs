@@ -260,10 +260,10 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l2t, l2, coefp]);
-                } else if (c1IndexesMap[s] !== "undefined") {
+                } else if (typeof c1IndexesMap[s] !== "undefined") {
                     if (typeof C1[c1IndexesMap[s]] === "undefined") C1[c1IndexesMap[s]] = [];
                     C1[c1IndexesMap[s]].push([l2t, l2, coefp]);
-                } else if (c2IndexesMap[s] !== "undefined") {
+                } else if (typeof c2IndexesMap[s] !== "undefined") {
                     if (typeof C2[c2IndexesMap[s]] === "undefined") C2[c2IndexesMap[s]] = [];
                     C2[c2IndexesMap[s]].push([l2t, l2, coefp]);
                 } else {
@@ -293,10 +293,10 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l3t, l3, coefp]);
-                } else if (c1IndexesMap[s] !== "undefined") {
+                } else if (typeof c1IndexesMap[s] !== "undefined") {
                     if (typeof C1[c1IndexesMap[s]] === "undefined") C1[c1IndexesMap[s]] = [];
                     C1[c1IndexesMap[s]].push([l3t, l3, coefp]);
-                } else if (c2IndexesMap[s] !== "undefined") {
+                } else if (typeof c2IndexesMap[s] !== "undefined") {
                     if (typeof C2[c2IndexesMap[s]] === "undefined") C2[c2IndexesMap[s]] = [];
                     C2[c2IndexesMap[s]].push([l3t, l3, coefp]);
                 } else {
@@ -317,10 +317,10 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l1t, l1, coefp]);
-                } else if (c1IndexesMap[s] !== "undefined") {
+                } else if (typeof c1IndexesMap[s] !== "undefined") {
                     if (typeof C1[c1IndexesMap[s]] === "undefined") C1[c1IndexesMap[s]] = [];
                     C1[c1IndexesMap[s]].push([l1t, l1, coefp]);
-                } else if (c2IndexesMap[s] !== "undefined") {
+                } else if (typeof c2IndexesMap[s] !== "undefined") {
                     if (typeof C2[c2IndexesMap[s]] === "undefined") C2[c2IndexesMap[s]] = [];
                     C2[c2IndexesMap[s]].push([l1t, l1, coefp]);
                 } else {

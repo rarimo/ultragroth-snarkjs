@@ -95,10 +95,15 @@ describe("Smart contracts test suite", function () {
         const ptauFile = "powersOfTau28_hez_final_20.ptau";
         const r1csFile = "seheavy_lookup.r1cs";
         const zkeyFile = "seheavy_lookup.zkey";
+        const vkeyFile = "seheavy_lookup.vkey.json";
 
-        await snarkjs.ultraZKey.newUltraZKey(r1csFile, ptauFile, zkeyFile, [indexes.c1, indexes.c2]);
+        // await snarkjs.ultraZKey.newUltraZKey(r1csFile, ptauFile, zkeyFile, [indexes.c1, indexes.c2]);
 
         console.log(await snarkjs.ultraZKey.ultraZkeyExportJson(zkeyFile));
+        console.log(await snarkjs.ultraZKey.ultraZkeyExportVerificationKey(zkeyFile));
+
+        const vKeyData = await snarkjs.ultraZKey.ultraZkeyExportVerificationKey(zkeyFile);
+        fs.writeFileSync(vkeyFile, JSON.stringify(vKeyData));
 
         return true;
         // const { proof: proof, publicSignals: publicInputs } = await snarkjs.groth16.prove(zkeyFilename, wtnsFilename);
