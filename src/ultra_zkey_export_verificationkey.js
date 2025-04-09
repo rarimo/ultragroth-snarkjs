@@ -34,7 +34,7 @@ export default async function ultraZkeyExportVerificationKey(zkeyName, logger) {
 
     let res;
     if (zkey.protocol === "ultragroth") {
-        res = await groth16Vk(zkey, fd, sections);
+        res = await ultragrothVk(zkey, fd, sections);
     } else {
         throw new Error("zkey file protocol unrecognized");
     }
@@ -47,7 +47,7 @@ export default async function ultraZkeyExportVerificationKey(zkeyName, logger) {
 }
 
 
-async function groth16Vk(zkey, fd, sections) {
+async function ultragrothVk(zkey, fd, sections) {
     const curve = await getCurve(zkey.q);
     const sG1 = curve.G1.F.n8 * 2;
 

@@ -21,3 +21,5 @@
 export {default as newUltraZKey} from "./ultra_zkey_new.js";
 export {default as ultraZkeyExportJson} from "./ultra_zkey_export_json.js";
 export {default as ultraZkeyExportVerificationKey} from "./ultra_zkey_export_verificationkey.js";
+export {default as ultraPhase2contribute} from "./ultra_zkey_contribute.js";
+export {default as ultraPhase2verifyFromInit} from "./ultra_zkey_verify_frominit.js";

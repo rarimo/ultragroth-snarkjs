@@ -413,12 +413,17 @@ export async function readZKey(fileName, toObject) {
 }
 
 async function readContribution(fd, curve, toObject) {
-    const c = {delta: {}};
-    c.deltaAfter = await readG1(fd, curve, toObject);
-    c.delta.g1_s = await readG1(fd, curve, toObject);
-    c.delta.g1_sx = await readG1(fd, curve, toObject);
-    c.delta.g2_spx = await readG2(fd, curve, toObject);
-    c.transcript = await fd.read(64);
+    const c = {delta1: {}, delta2: {}};
+    c.delta1After = await readG1(fd, curve, toObject);
+    c.delta1.g1_s = await readG1(fd, curve, toObject);
+    c.delta1.g1_sx = await readG1(fd, curve, toObject);
+    c.delta1.g2_spx = await readG2(fd, curve, toObject);
+    c.transcript1 = await fd.read(64);
+    c.delta2After = await readG1(fd, curve, toObject);
+    c.delta2.g1_s = await readG1(fd, curve, toObject);
+    c.delta2.g1_sx = await readG1(fd, curve, toObject);
+    c.delta2.g2_spx = await readG2(fd, curve, toObject);
+    c.transcript2 = await fd.read(64);
     c.type = await fd.readULE32();
 
     const paramLength = await fd.readULE32();
@@ -451,7 +456,7 @@ async function readContribution(fd, curve, toObject) {
 
 
 export async function readMPCParams(fd, curve, sections) {
-    await binFileUtils.startReadUniqueSection(fd, sections, 10);
+    await binFileUtils.startReadUniqueSection(fd, sections, 13);
     const res = {contributions: []};
     res.csHash = await fd.read(64);
     const n = await fd.readULE32();
@@ -465,11 +470,16 @@ export async function readMPCParams(fd, curve, sections) {
 }
 
 async function writeContribution(fd, curve, c) {
-    await writeG1(fd, curve, c.deltaAfter);
-    await writeG1(fd, curve, c.delta.g1_s);
-    await writeG1(fd, curve, c.delta.g1_sx);
-    await writeG2(fd, curve, c.delta.g2_spx);
-    await fd.write(c.transcript);
+    await writeG1(fd, curve, c.delta1After);
+    await writeG1(fd, curve, c.delta1.g1_s);
+    await writeG1(fd, curve, c.delta1.g1_sx);
+    await writeG2(fd, curve, c.delta1.g2_spx);
+    await fd.write(c.transcript1);
+    await writeG1(fd, curve, c.delta2After);
+    await writeG1(fd, curve, c.delta2.g1_s);
+    await writeG1(fd, curve, c.delta2.g1_sx);
+    await writeG2(fd, curve, c.delta2.g2_spx);
+    await fd.write(c.transcript2);
     await fd.writeULE32(c.type || 0);
 
     const params = [];
@@ -498,7 +508,7 @@ async function writeContribution(fd, curve, c) {
 }
 
 export async function writeMPCParams(fd, curve, mpcParams) {
-    await binFileUtils.startWriteSection(fd, 10);
+    await binFileUtils.startWriteSection(fd, 13);
     await fd.write(mpcParams.csHash);
     await fd.writeULE32(mpcParams.contributions.length);
     for (let i = 0; i < mpcParams.contributions.length; i++) {
@@ -519,10 +529,18 @@ export function hashG2(hasher, curve, p) {
     hasher.update(buff);
 }
 
-export function hashPubKey(hasher, curve, c) {
-    hashG1(hasher, curve, c.deltaAfter);
-    hashG1(hasher, curve, c.delta.g1_s);
-    hashG1(hasher, curve, c.delta.g1_sx);
-    hashG2(hasher, curve, c.delta.g2_spx);
-    hasher.update(c.transcript);
+export function hashPubKeyDelta1(hasher, curve, c) {
+    hashG1(hasher, curve, c.delta1After);
+    hashG1(hasher, curve, c.delta1.g1_s);
+    hashG1(hasher, curve, c.delta1.g1_sx);
+    hashG2(hasher, curve, c.delta1.g2_spx);
+    hasher.update(c.transcript1);
+}
+
+export function hashPubKeyDelta2(hasher, curve, c) {
+    hashG1(hasher, curve, c.delta2After);
+    hashG1(hasher, curve, c.delta2.g1_s);
+    hashG1(hasher, curve, c.delta2.g1_sx);
+    hashG2(hasher, curve, c.delta2.g2_spx);
+    hasher.update(c.transcript2);
 }
