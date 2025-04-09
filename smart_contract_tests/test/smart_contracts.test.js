@@ -97,19 +97,21 @@ describe("Smart contracts test suite", function () {
         const zkeyFile = "seheavy_lookup.zkey";
         const zkeyFile2 = "seheavy_lookup2.zkey";
         const zkeyFile3 = "seheavy_lookup3.zkey";
+        const zkeyFinal = "seheavy_lookup_final.zkey";
         const vkeyFile = "seheavy_lookup.vkey.json";
 
         await snarkjs.ultraZKey.newUltraZKey(r1csFile, ptauFile, zkeyFile, [indexes.c1, indexes.c2]);
 
-        //console.log(await snarkjs.ultraZKey.ultraZkeyExportJson(zkeyFile));
         //console.log(await snarkjs.ultraZKey.ultraZkeyExportVerificationKey(zkeyFile));
 
         //const vKeyData = await snarkjs.ultraZKey.ultraZkeyExportVerificationKey(zkeyFile);
         //fs.writeFileSync(vkeyFile, JSON.stringify(vKeyData));
 
-        await snarkjs.ultraZKey.ultraPhase2contribute(zkeyFile, zkeyFile2, "name", "entropy");
-        await snarkjs.ultraZKey.ultraPhase2contribute(zkeyFile2, zkeyFile3, "surname", "entropy");
-        console.log(await snarkjs.ultraZKey.ultraPhase2verifyFromInit(zkeyFile, ptauFile, zkeyFile3, console));
+        await snarkjs.ultraZKey.ultraPhase2contribute(zkeyFile, zkeyFile2, "cont1", "entropy1");
+        await snarkjs.ultraZKey.ultraPhase2contribute(zkeyFile2, zkeyFile3, "cont2", "entropy2");
+        await snarkjs.ultraZKey.ultraBeacon(zkeyFile3, zkeyFinal, "beacon", "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", 10);
+
+        console.log(await snarkjs.ultraZKey.ultraPhase2verifyFromInit(zkeyFile, ptauFile, zkeyFinal, console));
 
         return true;
         // const { proof: proof, publicSignals: publicInputs } = await snarkjs.groth16.prove(zkeyFilename, wtnsFilename);

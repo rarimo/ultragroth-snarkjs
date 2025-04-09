@@ -98,18 +98,30 @@ export default async function ultraPhase2verifyFromInit(initFileName, pTauFileNa
             return false;
         }
 
-        // TODO: Add beacon for type 1 contributions
         if (c.type === 1) {
             const rng = await misc.rngFromBeaconParams(c.beaconHash, c.numIterationsExp);
-            const expected_prvKey = curve.Fr.fromRng(rng);
-            const expected_g1_s = curve.G1.toAffine(curve.G1.fromRng(rng));
-            const expected_g1_sx = curve.G1.toAffine(curve.G1.timesFr(expected_g1_s, expected_prvKey));
-            if (curve.G1.eq(expected_g1_s, c.delta.g1_s) !== true) {
-                console.log(`INVALID(${i}): Key of the beacon does not match. g1_s `);
+            const expected_prvKey1 = curve.Fr.fromRng(rng);
+            const expected_delta1_g1_s = curve.G1.toAffine(curve.G1.fromRng(rng));
+            const expected_delta1_g1_sx = curve.G1.toAffine(curve.G1.timesFr(expected_delta1_g1_s, expected_prvKey1));
+
+            const expected_prvKey2 = curve.Fr.fromRng(rng);
+            const expected_delta2_g1_s = curve.G1.toAffine(curve.G1.fromRng(rng));
+            const expected_delta2_g1_sx = curve.G1.toAffine(curve.G1.timesFr(expected_delta2_g1_s, expected_prvKey2));
+
+            if (curve.G1.eq(expected_delta1_g1_s, c.delta1.g1_s) !== true) {
+                console.log(`INVALID(${i}): Key of the beacon does not match. delta1 g1_s `);
                 return false;
             }
-            if (curve.G1.eq(expected_g1_sx, c.delta.g1_sx) !== true) {
-                console.log(`INVALID(${i}): Key of the beacon does not match. g1_sx `);
+            if (curve.G1.eq(expected_delta1_g1_sx, c.delta1.g1_sx) !== true) {
+                console.log(`INVALID(${i}): Key of the beacon does not match. delta1 g1_sx `);
+                return false;
+            }
+            if (curve.G1.eq(expected_delta2_g1_s, c.delta2.g1_s) !== true) {
+                console.log(`INVALID(${i}): Key of the beacon does not match. delta2 g1_s `);
+                return false;
+            }
+            if (curve.G1.eq(expected_delta2_g1_sx, c.delta2.g1_sx) !== true) {
+                console.log(`INVALID(${i}): Key of the beacon does not match. delta2 g1_sx `);
                 return false;
             }
         }
@@ -291,7 +303,6 @@ export default async function ultraPhase2verifyFromInit(initFileName, pTauFileNa
         const c = mpcParams.contributions[i];
         if (logger) logger.info("-------------------------");
         if (logger) logger.info(misc.formatHash(c.contributionHash, `contribution #${i + 1} ${c.name ? c.name : ""}:`));
-        // TODO: add beacon and check
         if (c.type === 1) {
             if (logger) logger.info(`Beacon generator: ${misc.byteArray2hex(c.beaconHash)}`);
             if (logger) logger.info(`Beacon iterations Exp: ${c.numIterationsExp}`);
