@@ -24,3 +24,4 @@ export {default as ultraZkeyExportVerificationKey} from "./ultra_zkey_export_ver
 export {default as ultraPhase2contribute} from "./ultra_zkey_contribute.js";
 export {default as ultraPhase2verifyFromInit} from "./ultra_zkey_verify_frominit.js";
 export {default as ultraBeacon} from "./ultra_zkey_beacon.js";
+export {default as ultraExportSolidityVerifier} from "./ultra_zkey_export_solidityverifier.js";
