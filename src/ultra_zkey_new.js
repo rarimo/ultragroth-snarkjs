@@ -19,6 +19,7 @@
 
 import {readR1csHeader} from "r1csfile";
 import * as utils from "./powersoftau_utils.js";
+import fs from "fs";
 import {
     createBinFile,
     endWriteSection,
@@ -33,20 +34,20 @@ import Blake2b from "blake2b-wasm";
 import BigArray from "./bigarray.js";
 import {ULTRAGROTH_PROTOCOL_ID} from "./zkey_constants.js";
 
-export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes, logger) {
-    if (indexes.length !== 2) {
-        throw new Error("Not 2 indexes sets");
-    }
+export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexesName, logger) {
+    const indexes = JSON.parse(fs.readFileSync(indexesName));
+    indexes.c1 = indexes.c1.map(Number);
+    indexes.c2 = indexes.c2.map(Number);
 
     const c1IndexesMap = [];
     const c2IndexesMap = [];
 
-    for (let i = 0; i < indexes[0].length; ++i) {
-        c1IndexesMap[indexes[0][i]] = i;
+    for (let i = 0; i < indexes.c1.length; ++i) {
+        c1IndexesMap[indexes.c1[i]] = i;
     }
 
-    for (let i = 0; i < indexes[1].length; ++i) {
-        c2IndexesMap[indexes[1][i]] = i;
+    for (let i = 0; i < indexes.c2.length; ++i) {
+        c2IndexesMap[indexes.c2[i]] = i;
     }
 
     const TAU_G1 = 0;
@@ -111,8 +112,8 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     await fdZKey.writeULE32(r1cs.nVars);
     await fdZKey.writeULE32(nPublic);
     await fdZKey.writeULE32(domainSize);
-    await fdZKey.writeULE32(indexes[0].length);
-    await fdZKey.writeULE32(indexes[1].length);
+    await fdZKey.writeULE32(indexes.c1.length);
+    await fdZKey.writeULE32(indexes.c2.length);
 
     let bAlpha1;
     bAlpha1 = await fdPTau.read(sG1, sectionsPTau[4][0].p);
@@ -160,8 +161,8 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     const A = new BigArray(r1cs.nVars);
     const B1 = new BigArray(r1cs.nVars);
     const B2 = new BigArray(r1cs.nVars);
-    const C1 = new BigArray(indexes[0].length);
-    const C2 = new BigArray(indexes[1].length);
+    const C1 = new BigArray(indexes.c1.length);
+    const C2 = new BigArray(indexes.c2.length);
     const IC = new Array(nPublic + 1);
 
     if (logger) logger.info("Reading tauG1");
@@ -187,8 +188,8 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     await composeAndWritePoints(6, "G1", B1, "B1");
     await composeAndWritePoints(7, "G2", B2, "B2");
 
-    await writeIndexes(10, indexes[0]);
-    await writeIndexes(11, indexes[1]);
+    await writeIndexes(10, indexes.c1);
+    await writeIndexes(11, indexes.c2);
 
     const csHash = csHasher.digest();
     // Contributions section

@@ -212,7 +212,7 @@ describe("Smart contracts test suite", function () {
         // Verify the proof in the smart contract
         const { evaluations, polynomials } = proofJson;
 
-        const proof =
+        const proof = 
             [
                 ethers.utils.hexZeroPad(ethers.BigNumber.from(polynomials.C1[0]).toHexString(), 32),
                 ethers.utils.hexZeroPad(ethers.BigNumber.from(polynomials.C1[1]).toHexString(), 32),
