@@ -32,7 +32,7 @@ describe("Smart contracts test suite", function () {
         await curve.terminate();
     });
 
-    it.only("Groth16 smart contract 1 input", async () => {
+    it("Groth16 smart contract 1 input", async () => {
         expect(await groth16Verify(
             path.join("../test", "groth16", "circuit.r1cs"),
             path.join("../test", "groth16", "witness.wtns")
@@ -84,57 +84,29 @@ describe("Smart contracts test suite", function () {
     });
 
     async function groth16Verify(r1csFilename, wtnsFilename) {
-        // const solidityVerifierFilename = path.join("contracts", "groth16.sol");
+        const solidityVerifierFilename = path.join("contracts", "groth16.sol");
 
-        const rawIndexes = fs.readFileSync("data.json");
-        const indexes = JSON.parse(rawIndexes);
+        const zkeyFilename = { type: "mem" };
 
-        indexes.c1 = indexes.c1.map(Number);
-        indexes.c2 = indexes.c2.map(Number);
+        await snarkjs.zKey.newZKey(r1csFilename, ptauFilename, zkeyFilename);
+        const { proof: proof, publicSignals: publicInputs } = await snarkjs.groth16.prove(zkeyFilename, wtnsFilename);
 
-        const ptauFile = "powersOfTau28_hez_final_20.ptau";
-        const r1csFile = "seheavy_lookup.r1cs";
-        const zkeyFile = "seheavy_lookup.zkey";
-        const zkeyFile2 = "seheavy_lookup2.zkey";
-        const zkeyFile3 = "seheavy_lookup3.zkey";
-        const zkeyFinal = "seheavy_lookup_final.zkey";
-        const vkeyFile = "seheavy_lookup.vkey.json";
-        const verifierFile = "SeheavyUltraGrothVerifier.sol";
+        const proofA = [proof.pi_a[0], proof.pi_a[1]];
+        const proofB = [[proof.pi_b[0][1], proof.pi_b[0][0]], [proof.pi_b[1][1], proof.pi_b[1][0]]];
+        const proofC = [proof.pi_c[0], proof.pi_c[1]];
 
-        // await snarkjs.ultraZKey.newUltraZKey(r1csFile, ptauFile, zkeyFile, [indexes.c1, indexes.c2]);
-        //
-        // //console.log(await snarkjs.ultraZKey.ultraZkeyExportVerificationKey(zkeyFile));
-        //
-        // await snarkjs.ultraZKey.ultraPhase2contribute(zkeyFile, zkeyFile2, "cont1", "entropy1");
-        // await snarkjs.ultraZKey.ultraPhase2contribute(zkeyFile2, zkeyFile3, "cont2", "entropy2");
-        // await snarkjs.ultraZKey.ultraBeacon(zkeyFile3, zkeyFinal, "beacon", "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", 10);
-        //
-        // console.log(await snarkjs.ultraZKey.ultraPhase2verifyFromInit(zkeyFile, ptauFile, zkeyFinal, console));
-        //
-        // const vKeyData = await snarkjs.ultraZKey.ultraZkeyExportVerificationKey(zkeyFinal);
-        // fs.writeFileSync(vkeyFile, JSON.stringify(vKeyData));
+        // Generate groth16 verifier solidity file from groth16 template + zkey
+        const verifierCode = await snarkjs.zKey.exportSolidityVerifier(zkeyFilename, templates);
+        fs.writeFileSync(solidityVerifierFilename, verifierCode, "utf-8");
 
-        await snarkjs.ultraZKey.ultraExportSolidityVerifier(zkeyFinal, verifierFile);
+        // Compile the groth16 verifier smart contract
+        await run("compile");
 
-        return true;
-        // const { proof: proof, publicSignals: publicInputs } = await snarkjs.groth16.prove(zkeyFilename, wtnsFilename);
-        //
-        // const proofA = [proof.pi_a[0], proof.pi_a[1]];
-        // const proofB = [[proof.pi_b[0][1], proof.pi_b[0][0]], [proof.pi_b[1][1], proof.pi_b[1][0]]];
-        // const proofC = [proof.pi_c[0], proof.pi_c[1]];
-        //
-        // // Generate groth16 verifier solidity file from groth16 template + zkey
-        // const verifierCode = await snarkjs.zKey.exportSolidityVerifier(zkeyFilename, templates);
-        // fs.writeFileSync(solidityVerifierFilename, verifierCode, "utf-8");
-        //
-        // // Compile the groth16 verifier smart contract
-        // await run("compile");
-        //
-        // // Deploy mock groth16 verifier
-        // const VerifierFactory = await ethers.getContractFactory("Groth16Verifier");
-        // verifierContract = await VerifierFactory.deploy();
-        //
-        // return await verifierContract.verifyProof(proofA, proofB, proofC, publicInputs);
+        // Deploy mock groth16 verifier
+        const VerifierFactory = await ethers.getContractFactory("Groth16Verifier");
+        verifierContract = await VerifierFactory.deploy();
+
+        return await verifierContract.verifyProof(proofA, proofB, proofC, publicInputs);
     }
 
     async function groth16VerifyAliased(r1csFilename, wtnsFilename) {
@@ -240,7 +212,7 @@ describe("Smart contracts test suite", function () {
         // Verify the proof in the smart contract
         const { evaluations, polynomials } = proofJson;
 
-        const proof = 
+        const proof =
             [
                 ethers.utils.hexZeroPad(ethers.BigNumber.from(polynomials.C1[0]).toHexString(), 32),
                 ethers.utils.hexZeroPad(ethers.BigNumber.from(polynomials.C1[1]).toHexString(), 32),
