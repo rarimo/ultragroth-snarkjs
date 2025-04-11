@@ -19,6 +19,7 @@ describe("Smart contracts test suite", function () {
     templates.groth16 = fs.readFileSync(path.join("../templates", "verifier_groth16.sol.ejs"), "utf8");
     templates.plonk = fs.readFileSync(path.join("../templates", "verifier_plonk.sol.ejs"), "utf8");
     templates.fflonk = fs.readFileSync(path.join("../templates", "verifier_fflonk.sol.ejs"), "utf8");
+    templates.ultragroth = fs.readFileSync(path.join("../templates", "verifier_ultragroth.sol.ejs"), "utf8");
 
     let verifierContract;
     let curve;
@@ -30,6 +31,14 @@ describe("Smart contracts test suite", function () {
 
     after(async () => {
         await curve.terminate();
+    });
+
+    it.only("Ultragroth smart contract 1 input", async () => {
+        expect(await ultragrothVerify(
+            path.join("../test", "ultragroth", "seheavy_lookup_final.zkey"),
+            path.join("../test", "ultragroth", "seheavy_proof.json"),
+            path.join("../test", "ultragroth", "seheavy_inputs.json")
+        )).to.be.equal(true);
     });
 
     it("Groth16 smart contract 1 input", async () => {
@@ -82,6 +91,26 @@ describe("Smart contracts test suite", function () {
             path.join("../test", "circuit2", "witness.wtns")
         )).to.be.equal(true);
     });
+
+    async function ultragrothVerify(zkeyFilename, proofFilename, inputsFilename) {
+        const solidityVerifierFilename = path.join("contracts", "UltragrothVerifier.sol");
+
+        await snarkjs.ultraZKey.ultraExportSolidityVerifier(zkeyFilename, solidityVerifierFilename);
+        await run("compile");
+
+        const VerifierFactory = await ethers.getContractFactory("UltragrothVerifier");
+        verifierContract = await VerifierFactory.deploy();
+
+        const proof = JSON.parse(fs.readFileSync(proofFilename));
+        const publicInputs = JSON.parse(fs.readFileSync(inputsFilename));
+
+        const proofA = [proof.pi_a[0], proof.pi_a[1]];
+        const proofB = [[proof.pi_b[0][1], proof.pi_b[0][0]], [proof.pi_b[1][1], proof.pi_b[1][0]]];
+        const proofC1 = [proof.pi_r[0], proof.pi_r[1]];
+        const proofC2 = [proof.pi_f[0], proof.pi_f[1]];
+
+        return await verifierContract.verifyProof(proofA, proofB, proofC1, proofC2, publicInputs);
+    }
 
     async function groth16Verify(r1csFilename, wtnsFilename) {
         const solidityVerifierFilename = path.join("contracts", "groth16.sol");
