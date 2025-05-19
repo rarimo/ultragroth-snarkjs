@@ -36,8 +36,18 @@ import {ULTRAGROTH_PROTOCOL_ID} from "./zkey_constants.js";
 
 export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexesName, logger) {
     const indexes = JSON.parse(fs.readFileSync(indexesName));
+
+    if (
+        indexes.c1 === undefined ||
+        indexes.c2 === undefined ||
+        indexes.randIdx === undefined
+    ) {
+        throw new Error("invalid indexes json");
+    }
+
     indexes.c1 = indexes.c1.map(Number);
     indexes.c2 = indexes.c2.map(Number);
+    indexes.randIdx = Number(indexes.randIdx);
 
     const c1IndexesMap = [];
     const c2IndexesMap = [];
@@ -114,6 +124,7 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     await fdZKey.writeULE32(domainSize);
     await fdZKey.writeULE32(indexes.c1.length);
     await fdZKey.writeULE32(indexes.c2.length);
+    await fdZKey.writeULE32(indexes.randIdx);
 
     let bAlpha1;
     bAlpha1 = await fdPTau.read(sG1, sectionsPTau[4][0].p);

@@ -21,7 +21,7 @@
 // ======
 // Header(1)
 //      prover_type (1337 for UltraGroth)
-// HeaderGroth(2)
+// HeaderUltraGroth(2)
 //      n8q (the number of bytes needed to hold field order)
 //      q (field order)
 //      n8r (the number of bytes needed to hold group order)
@@ -31,6 +31,7 @@
 //      domain_size (2 ** (log2(n_constraints + n_pubs) + 1))
 //      n_indexes_c1
 //      n_indexes_c2
+//      rand_idx
 //      alpha_1
 //      beta_1
 //      beta_2
@@ -85,6 +86,7 @@ export async function writeHeader(fd, zkey) {
     await fd.writeULE32(zkey.domainSize);
     await fd.writeULE32(zkey.nIndexesC1);
     await fd.writeULE32(zkey.nIndexesC2);
+    await fd.writeULE32(zkey.randIdx);
 
     await writeG1(fd, curve, zkey.vk_alpha_1);
     await writeG1(fd, curve, zkey.vk_beta_1);
@@ -276,6 +278,7 @@ async function readHeaderUltraGroth(fd, sections, toObject, options) {
     zkey.domainSize = await fd.readULE32();
     zkey.nIndexesC1 = await fd.readULE32();
     zkey.nIndexesC2 = await fd.readULE32();
+    zkey.randIdx = await fd.readULE32();
     zkey.power = log2(zkey.domainSize);
     zkey.vk_alpha_1 = await readG1(fd, zkey.curve, toObject);
     zkey.vk_beta_1 = await readG1(fd, zkey.curve, toObject);

@@ -44,7 +44,7 @@ describe.only("UltraGroth test suite", function () {
         await ultragroth.ultraPhase2contribute(zkey2Filename, zkey3Filename, "contribution2", "entropy2");
         await ultragroth.ultraBeacon(zkey3Filename, zkeyFinalFilename, "beacon", "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f", 10);
         const vKeyData = await ultraZkeyExportVerificationKey(zkeyFinalFilename);
-         fs.writeFileSync(vkeyFilename, JSON.stringify(vKeyData));
+        fs.writeFileSync(vkeyFilename, JSON.stringify(vKeyData));
 
         const isValid = await ultragroth.ultraPhase2verifyFromInit(zkey1Filename, ptauFilename, zkeyFinalFilename);
 

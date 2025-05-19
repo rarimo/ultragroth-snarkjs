@@ -57,6 +57,7 @@ async function ultragrothVk(zkey, fd, sections) {
         protocol: zkey.protocol,
         curve: curve.name,
         nPublic: zkey.nPublic,
+        randIdx: zkey.randIdx,
 
         vk_alpha_1: curve.G1.toObject(zkey.vk_alpha_1),
 

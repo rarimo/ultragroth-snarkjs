@@ -158,7 +158,8 @@ export default async function ultraPhase2verifyFromInit(initFileName, pTauFileNa
         || (zkeyInit.nPublic !== zkey.nPublic)
         || (zkeyInit.domainSize !== zkey.domainSize)
         || (zkeyInit.nIndexesC1 !== zkey.nIndexesC1)
-        || (zkeyInit.nIndexesC2 !== zkey.nIndexesC2)) {
+        || (zkeyInit.nIndexesC2 !== zkey.nIndexesC2)
+        || (zkeyInit.randIdx !== zkey.randIdx)) {
         if (logger) logger.error("INVALID:  Different circuit parameters");
         return false;
     }
