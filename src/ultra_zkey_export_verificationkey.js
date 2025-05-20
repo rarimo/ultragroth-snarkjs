@@ -57,7 +57,6 @@ async function ultragrothVk(zkey, fd, sections) {
         protocol: zkey.protocol,
         curve: curve.name,
         nPublic: zkey.nPublic,
-        randIdx: zkey.randIdx,
 
         vk_alpha_1: curve.G1.toObject(zkey.vk_alpha_1),
 
@@ -76,7 +75,12 @@ async function ultragrothVk(zkey, fd, sections) {
     for (let i = 0; i <= zkey.nPublic; i++) {
         const buff = await fd.read(sG1);
         const P = curve.G1.toObject(buff);
-        vKey.IC.push(P);
+
+        if (i !== zkey.randIdx) {
+            vKey.IC.push(P);
+        } else {
+            vKey.IC_rand = P;
+        }
     }
     await binFileUtils.endReadSection(fd);
 

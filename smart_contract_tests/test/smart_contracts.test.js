@@ -35,9 +35,9 @@ describe("Smart contracts test suite", function () {
 
     it.only("Ultragroth smart contract 1 input", async () => {
         expect(await ultragrothVerify(
-            path.join("../test", "ultragroth", "seheavy_lookup_final.zkey"),
-            path.join("../test", "ultragroth", "seheavy_proof.json"),
-            path.join("../test", "ultragroth", "seheavy_inputs.json")
+            path.join("../test", "ultragroth", "sequential_lookup_final.zkey"),
+            path.join("../test", "ultragroth", "proof.json"),
+            path.join("../test", "ultragroth", "public.json")
         )).to.be.equal(true);
     });
 
