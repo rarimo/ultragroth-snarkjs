@@ -38,26 +38,26 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     const indexes = JSON.parse(fs.readFileSync(indexesName));
 
     if (
-        indexes.c1 === undefined ||
-        indexes.c2 === undefined ||
-        indexes.randIdx === undefined
+        indexes.round1 === undefined ||
+        indexes.round2 === undefined ||
+        indexes.rand_index === undefined
     ) {
         throw new Error("invalid indexes json");
     }
 
-    indexes.c1 = indexes.c1.map(Number);
-    indexes.c2 = indexes.c2.map(Number);
-    indexes.randIdx = Number(indexes.randIdx);
+    indexes.round1 = indexes.round1.map(Number);
+    indexes.round2 = indexes.round2.map(Number);
+    indexes.rand_index = Number(indexes.rand_index);
 
-    const c1IndexesMap = [];
-    const c2IndexesMap = [];
+    const round1IndexesMap = [];
+    const round2IndexesMap = [];
 
-    for (let i = 0; i < indexes.c1.length; ++i) {
-        c1IndexesMap[indexes.c1[i]] = i;
+    for (let i = 0; i < indexes.round1.length; ++i) {
+        round1IndexesMap[indexes.round1[i]] = i;
     }
 
-    for (let i = 0; i < indexes.c2.length; ++i) {
-        c2IndexesMap[indexes.c2[i]] = i;
+    for (let i = 0; i < indexes.round2.length; ++i) {
+        round2IndexesMap[indexes.round2[i]] = i;
     }
 
     const TAU_G1 = 0;
@@ -122,8 +122,8 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     await fdZKey.writeULE32(r1cs.nVars);
     await fdZKey.writeULE32(nPublic);
     await fdZKey.writeULE32(domainSize);
-    await fdZKey.writeULE32(indexes.c1.length);
-    await fdZKey.writeULE32(indexes.c2.length);
+    await fdZKey.writeULE32(indexes.round1.length);
+    await fdZKey.writeULE32(indexes.round2.length);
     await fdZKey.writeULE32(indexes.randIdx);
 
     let bAlpha1;
@@ -172,8 +172,8 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     const A = new BigArray(r1cs.nVars);
     const B1 = new BigArray(r1cs.nVars);
     const B2 = new BigArray(r1cs.nVars);
-    const C1 = new BigArray(indexes.c1.length);
-    const C2 = new BigArray(indexes.c2.length);
+    const C1 = new BigArray(indexes.round1.length);
+    const C2 = new BigArray(indexes.round2.length);
     const IC = new Array(nPublic + 1);
 
     if (logger) logger.info("Reading tauG1");
@@ -199,8 +199,8 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     await composeAndWritePoints(6, "G1", B1, "B1");
     await composeAndWritePoints(7, "G2", B2, "B2");
 
-    await writeIndexes(10, indexes.c1);
-    await writeIndexes(11, indexes.c2);
+    await writeIndexes(10, indexes.round1);
+    await writeIndexes(11, indexes.round2);
 
     const csHash = csHasher.digest();
     // Contributions section
@@ -272,12 +272,12 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l2t, l2, coefp]);
-                } else if (typeof c1IndexesMap[s] !== "undefined") {
-                    if (typeof C1[c1IndexesMap[s]] === "undefined") C1[c1IndexesMap[s]] = [];
-                    C1[c1IndexesMap[s]].push([l2t, l2, coefp]);
-                } else if (typeof c2IndexesMap[s] !== "undefined") {
-                    if (typeof C2[c2IndexesMap[s]] === "undefined") C2[c2IndexesMap[s]] = [];
-                    C2[c2IndexesMap[s]].push([l2t, l2, coefp]);
+                } else if (typeof round1IndexesMap[s] !== "undefined") {
+                    if (typeof C1[round1IndexesMap[s]] === "undefined") C1[round1IndexesMap[s]] = [];
+                    C1[round1IndexesMap[s]].push([l2t, l2, coefp]);
+                } else if (typeof round2IndexesMap[s] !== "undefined") {
+                    if (typeof C2[round2IndexesMap[s]] === "undefined") C2[round2IndexesMap[s]] = [];
+                    C2[round2IndexesMap[s]].push([l2t, l2, coefp]);
                 } else {
                     throw new Error("Index is not in set");
                 }
@@ -305,12 +305,12 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l3t, l3, coefp]);
-                } else if (typeof c1IndexesMap[s] !== "undefined") {
-                    if (typeof C1[c1IndexesMap[s]] === "undefined") C1[c1IndexesMap[s]] = [];
-                    C1[c1IndexesMap[s]].push([l3t, l3, coefp]);
-                } else if (typeof c2IndexesMap[s] !== "undefined") {
-                    if (typeof C2[c2IndexesMap[s]] === "undefined") C2[c2IndexesMap[s]] = [];
-                    C2[c2IndexesMap[s]].push([l3t, l3, coefp]);
+                } else if (typeof round1IndexesMap[s] !== "undefined") {
+                    if (typeof C1[round1IndexesMap[s]] === "undefined") C1[round1IndexesMap[s]] = [];
+                    C1[round1IndexesMap[s]].push([l3t, l3, coefp]);
+                } else if (typeof round2IndexesMap[s] !== "undefined") {
+                    if (typeof C2[round2IndexesMap[s]] === "undefined") C2[round2IndexesMap[s]] = [];
+                    C2[round2IndexesMap[s]].push([l3t, l3, coefp]);
                 } else {
                     throw new Error("Index is not in set");
                 }
@@ -329,12 +329,12 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
                 if (s <= nPublic) {
                     if (typeof IC[s] === "undefined") IC[s] = [];
                     IC[s].push([l1t, l1, coefp]);
-                } else if (typeof c1IndexesMap[s] !== "undefined") {
-                    if (typeof C1[c1IndexesMap[s]] === "undefined") C1[c1IndexesMap[s]] = [];
-                    C1[c1IndexesMap[s]].push([l1t, l1, coefp]);
-                } else if (typeof c2IndexesMap[s] !== "undefined") {
-                    if (typeof C2[c2IndexesMap[s]] === "undefined") C2[c2IndexesMap[s]] = [];
-                    C2[c2IndexesMap[s]].push([l1t, l1, coefp]);
+                } else if (typeof round1IndexesMap[s] !== "undefined") {
+                    if (typeof C1[round1IndexesMap[s]] === "undefined") C1[round1IndexesMap[s]] = [];
+                    C1[round1IndexesMap[s]].push([l1t, l1, coefp]);
+                } else if (typeof round2IndexesMap[s] !== "undefined") {
+                    if (typeof C2[round2IndexesMap[s]] === "undefined") C2[round2IndexesMap[s]] = [];
+                    C2[round2IndexesMap[s]].push([l1t, l1, coefp]);
                 } else {
                     throw new Error("Index is not in set");
                 }
