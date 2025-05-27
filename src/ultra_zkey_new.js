@@ -124,7 +124,7 @@ export default async function newUltraZKey(r1csName, ptauName, zkeyName, indexes
     await fdZKey.writeULE32(domainSize);
     await fdZKey.writeULE32(indexes.round1.length);
     await fdZKey.writeULE32(indexes.round2.length);
-    await fdZKey.writeULE32(indexes.randIdx);
+    await fdZKey.writeULE32(indexes.rand_index);
 
     let bAlpha1;
     bAlpha1 = await fdPTau.read(sG1, sectionsPTau[4][0].p);
